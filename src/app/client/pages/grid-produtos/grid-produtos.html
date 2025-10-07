@@ -1,0 +1,7 @@
+<div class="grid-produtos" [ngClass]="{'grid-home-layout': layoutMode === 'home'}">
+  <app-card-produto
+    *ngFor="let produto of produtos"  [itemCardapio]="produto"
+    (click)="onDetalhesItem(produto.id)" 
+    style="cursor: pointer;">
+  </app-card-produto>
+</div>

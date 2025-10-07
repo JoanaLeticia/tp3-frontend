@@ -1,0 +1,240 @@
+<app-header 
+  (abrirLogin)="abrirLogin()" 
+  (abrirRegistro)="abrirRegistro()">
+</app-header>
+
+<body>
+    <div class="banner-principal">
+        <div class="texto-banner">
+            <h2>
+                Seja bem-vindo!
+            </h2>
+            <h1>
+                FAÇA A SUA RESERVA
+            </h1>
+            <div class="btn-cliqueaqui">
+                Clique aqui
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="sobre">
+            <img src="assets/sobre-foodlfow.png" class="imagem-chef">
+            <div class="sobre-texto">
+                <h2>Sobre nós</h2>
+                <h1>FoodFlow</h1>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras rhoncus a ex sed suscipit. Mauris ante
+                    risus, feugiat a lobortis nec, congue quis eros. In semper nulla orci, quis pellentesque tellus
+                    scelerisque sit amet. Nulla eu blandit mauris, sit amet placerat lacus. Mauris at metus odio. In
+                    eleifend convallis velit non mattis. Sed nec imperdiet est, sit amet congue purus. Quisque eu
+                    sodales dolor.
+
+                    <br><br>
+                    Ut fermentum nulla odio, ac auctor leo vestibulum non. Nunc vitae dui nunc. Phasellus sed nisi at
+                    odio pharetra dictum. Etiam tristique placerat leo, a hendrerit eros faucibus ut. Proin ante dui,
+                    euismod vulputate ultrices id, dictum sit amet magna. Vivamus massa ante, viverra feugiat arcu non,
+                    luctus maximus neque. Sed interdum facilisis placerat. Duis et eros sodales, viverra libero eu,
+                    malesuada ante.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="sugestoes-chef">
+        <div class="container" style="display: flex;">
+            <div class="sugestoes-texto">
+                <h2>Veja as</h2>
+                <h1>Sugestões do Chefe</h1>
+                <p>Descubra os pratos especiais selecionados pelo nosso chef. Todas as sugestões incluem 20% de
+                    desconto!</p>
+            </div>
+
+            <!-- Botões do Carrossel - Só aparecem quando há ambas as sugestões -->
+            <div class="botoes-carrossel" *ngIf="temAmbasSugestoes">
+                <div class="btn-carrossel" (click)="sugestaoAnterior()">
+                    <i class="fa-solid fa-angle-left"></i>
+                </div>
+                <div class="btn-carrossel" (click)="proximaSugestao()">
+                    <i class="fa-solid fa-angle-right"></i>
+                </div>
+            </div>
+
+            <div class="carrossel-sugestoes" *ngIf="!carregandoSugestoes">
+
+                <div class="sugestao-item" *ngIf="sugestaoAlmoco"
+                    [ngClass]="{'ativo': sugestaoAtual === 'ALMOCO', 'inativo': sugestaoAtual !== 'ALMOCO'}">
+
+                    <div class="carrossel-texto">
+                        <h3>Almoço</h3>
+                        <h2>{{ sugestaoAlmoco.nome }}</h2>
+                        <p class="descricao-sugestao">{{ sugestaoAlmoco.descricao }}</p>
+                        <div class="preco">
+                            <label>{{ sugestaoAlmoco.precoBase | currency:'BRL' }}</label>
+                            <strong>{{ sugestaoAlmoco.precoComDesconto | currency:'BRL' }}</strong>
+                        </div>
+                        <div class="btn-addcarrinho" (click)="adicionarAoCarrinho(sugestaoAlmoco)">
+                            <i class="fa-solid fa-cart-shopping"></i>Adicionar ao Carrinho
+                        </div>
+                    </div>
+                    <img [src]="sugestaoAlmoco.urlImagem" [alt]="sugestaoAlmoco.nome"
+                        (error)="sugestaoAlmoco.urlImagem = 'assets/imagem-padrao.jpg'">
+                </div>
+
+                <div class="sugestao-item" *ngIf="sugestaoJantar"
+                    [ngClass]="{'ativo': sugestaoAtual === 'JANTAR', 'inativo': sugestaoAtual !== 'JANTAR'}">
+
+                    <div class="carrossel-texto">
+                        <h3>Jantar</h3>
+                        <h2>{{ sugestaoJantar.nome }}</h2>
+                        <p class="descricao-sugestao">{{ sugestaoJantar.descricao }}</p>
+                        <div class="preco">
+                            <label>{{ sugestaoJantar.precoBase | currency:'BRL' }}</label>
+                            <strong>{{ sugestaoJantar.precoComDesconto | currency:'BRL' }}</strong>
+                        </div>
+                        <div class="btn-addcarrinho" (click)="adicionarAoCarrinho(sugestaoJantar)">
+                            <i class="fa-solid fa-cart-shopping"></i>Adicionar ao Carrinho
+                        </div>
+                    </div>
+                    <img [src]="sugestaoJantar.urlImagem" [alt]="sugestaoJantar.nome"
+                        (error)="sugestaoJantar.urlImagem = 'assets/imagem-padrao.jpg'">
+                </div>
+
+                <div *ngIf="!sugestaoAlmoco && !sugestaoJantar" class="sem-sugestoes">
+                    <p>Não há sugestões do chef disponíveis no momento.</p>
+                    <small>Volte amanhã para novas sugestões especiais!</small>
+                </div>
+            </div>
+
+            <!-- Loading das sugestões -->
+            <div *ngIf="carregandoSugestoes" class="loading-sugestoes">
+                <i class="fa-solid fa-utensils fa-spin"></i>
+                <p>Carregando sugestões do chef...</p>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="cardapio-section">
+            <div class="cardapio-title">
+                <h2>Confira o nosso</h2>
+                <h1>Cardápio</h1>
+            </div>
+
+            <!-- Filtros de Período -->
+            <div class="opcoes">
+                <div class="opcao" [class.opcao-selecionada]="periodoSelecionado === 'ALMOCO'"
+                    (click)="alternarPeriodo('ALMOCO')">
+                    Almoço
+                </div>
+                <div class="opcao" [class.opcao-selecionada]="periodoSelecionado === 'JANTAR'"
+                    (click)="alternarPeriodo('JANTAR')">
+                    Jantar
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div *ngIf="carregando" class="loading">
+                Carregando...
+            </div>
+
+            <!-- Grid de Produtos -->
+            <div *ngIf="!carregando">
+                <app-grid-produtos layoutMode="home" [produtos]="produtos">
+                </app-grid-produtos>
+
+                <!-- Mensagem quando não há produtos -->
+                <div *ngIf="produtos.length === 0" class="sem-produtos">
+                    Nenhum produto encontrado para o período selecionado.
+                </div>
+            </div>
+
+            <div class="btn-vercardapio">
+                Ver cardápio completo
+            </div>
+        </div>
+    </div>
+
+    <div class="reserva-section" style="margin-bottom: 60px;">
+        <div class="reserva-section2">
+            <div class="container">
+                <div class="reserva-texto">
+                    <h2>Reserva</h2>
+                    <h1>Reserve a sua mesa</h1>
+                    <p>Faça sua reserva de forma rápida e prática. O sistema escolherá automaticamente a mesa ideal para
+                        você!</p>
+                </div>
+
+                <div class="formulario-reserva-tailwind" style="margin-top: -10px;">
+                    <div style="display: flex; gap: 20px; width: 1034px;">
+
+                        <!-- Data com Date Picker Estilizado -->
+                        <div class="space-y-2" style="width: 270px;">
+                            <label for="dataReserva" class="block text-white font-medium text-sm">
+                                Data
+                            </label>
+                            <div class="relative">
+                                <input type="date" id="dataReserva" [(ngModel)]="dataReserva"
+                                    (change)="onDadosReservaChange()" [min]="getDataMinima()" [max]="getDataMaxima()"
+                                    class="w-full px-4 py-3 bg-white/5 rounded-lg text-white placeholder-white placeholder-opacity-60 focus:outline-none focus:ring-2 focus:ring-white-300 focus:border-transparent transition-all duration-200 backdrop-blur-sm"
+                                    placeholder="Selecione a data" style="border: 1px solid hsl(0, 0%, 100%, 40%)">
+                                <div
+                                    class="absolute right-5 top-1/2 transform -translate-y-1/2 text-white text-opacity-60">
+                                    <i class="fa-solid fa-calendar-days"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Número de Pessoas -->
+                        <div class="space-y-2" style="width: 270px;">
+                            <label for="numeroPessoas" class="block text-white font-medium text-sm">
+                                Pessoas
+                            </label>
+                            <select id="numeroPessoas" [(ngModel)]="numeroPessoas" (change)="onDadosReservaChange()"
+                                class="w-full px-4 py-3 bg-white/5 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white-300 focus:border-transparent transition-all duration-200 backdrop-blur-sm appearance-none" style="border: 1px solid hsl(0, 0%, 100%, 40%)">
+                                <option *ngFor="let num of [1,2,3,4,5,6,7,8]" [value]="num"
+                                    class="bg-gray-800 text-white">
+                                    {{ num }} pessoa{{ num > 1 ? 's' : '' }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Horário -->
+                        <div class="space-y-2" style="width: 225px;">
+                            <label for="horarioReserva" class="block text-white font-medium text-sm">
+                                Horário
+                            </label>
+                            <select id="horarioReserva" [(ngModel)]="horarioReserva"
+                                class="w-full px-4 py-3 bg-white/5 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white-300 focus:border-transparent transition-all duration-200 backdrop-blur-sm appearance-none" style="border: 1px solid hsl(0, 0%, 100%, 40%)"
+                                [class.opacity-50]="horariosDisponiveis.length === 0"
+                                [disabled]="horariosDisponiveis.length === 0">
+                                <option value="" class="bg-gray-800 text-white">Selecione um horário</option>
+                                <option *ngFor="let horario of horariosDisponiveis" [value]="horario"
+                                    class="bg-gray-800 text-white">
+                                    {{ horario }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Botão de Reserva -->
+                        <div class="mt-7 flex justify-center">
+                            <button type="button" (click)="fazerReserva()"
+                                [disabled]="!dataReserva || !horarioReserva || reservando">
+
+                                <div class="flex items-center gap-3" style="width: 160px; display: flex; text-align: center; justify-content: center;">
+                                    <span *ngIf="reservando">Processando...</span>
+                                    <span *ngIf="!reservando">Checar disponibilidade</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<app-login-modal 
+  *ngIf="mostrarLoginModal"
+  (close)="fecharLoginModal()"
+  (switchToRegister)="abrirRegistro()">
+</app-login-modal>
+
+<app-footer></app-footer>

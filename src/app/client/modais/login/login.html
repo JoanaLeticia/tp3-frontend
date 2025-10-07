@@ -1,0 +1,67 @@
+<div class="modal-backdrop" (click)="onBackdropClick($event)">
+    <div class="modal-content">
+        <div class="close">
+            <button class="close-button" (click)="fecharModal()" aria-label="Fechar">
+                &times;
+            </button>
+        </div>
+        <!-- Cabeçalho -->
+        <div class="modal-header">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <h2 class="modal-title">Fazer Login</h2>
+            </div>
+
+            <p>
+                Seja bem-vindo de volta, insira as suas credenciais para te conectarmos de volta.
+            </p>
+        </div>
+
+        <!-- Corpo do Modal -->
+        <div class="modal-body">
+            <form (ngSubmit)="fazerLogin()">
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="email" class="form-label">E-mail</label>
+                    <input type="email" id="email" [(ngModel)]="email" name="email" class="form-input"
+                        placeholder="seu@email.com" required>
+                </div>
+
+                <!-- Senha -->
+                <div class="form-group">
+                    <label for="senha" class="form-label">Senha</label>
+                    <input type="password" id="senha" [(ngModel)]="senha" name="senha" class="form-input"
+                        placeholder="Sua senha" required>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <!-- Lembrar de mim -->
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="lembrarMe" [(ngModel)]="lembrarMe" name="lembrarMe"
+                            class="checkbox-input">
+                        <label for="lembrarMe" class="checkbox-label">Lembrar de mim</label>
+                    </div>
+
+                    <!-- Esqueci a senha -->
+                    <a href="#" class="forgot-password" (click)="recuperarSenha(); $event.preventDefault()">
+                        Esqueci minha senha
+                    </a>
+                </div>
+
+
+                <!-- Botão de Login -->
+                <button type="submit" class="login-button" [disabled]="carregando">
+                    <span *ngIf="carregando" class="spinner"></span>
+                    {{ carregando ? 'Entrando...' : 'Entrar' }}
+                </button>
+            </form>
+
+            <!-- Seção de Cadastro -->
+            <div class="register-section">
+                <p class="register-text">Ainda não tem uma conta?</p>
+                <button type="button" class="register-button" (click)="criarConta()">
+                    Criar conta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

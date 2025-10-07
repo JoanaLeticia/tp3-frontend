@@ -1,0 +1,26 @@
+<div class="prato-cardapio">
+  <!-- Use urlImagemCompleta em vez de nomeImagem -->
+  <img [src]="urlImagemCompleta" [alt]="itemCardapio.nome">
+
+  <div class="texto-prato">
+    <div class="nome-prato">
+      {{ itemCardapio.nome }}
+    </div>
+
+    <div class="linha-decorativa"></div>
+
+    <div class="preco-container">
+      <p *ngIf="itemCardapio.isSugestaoChefe" class="valor-prato-original">
+        {{ itemCardapio.precoBase | currency:'R$' }}
+      </p>
+
+      <p class="valor-prato">
+        {{ (itemCardapio.isSugestaoChefe ? itemCardapio.precoComDesconto : itemCardapio.precoBase) | currency:'R$' }}
+      </p>
+    </div>
+
+    <button class="btn-addcarrinho-cardapio" (click)="onAdicionar()">
+      <i class="fa-solid fa-cart-shopping"></i>Adicionar ao Carrinho
+    </button>
+  </div>
+</div>

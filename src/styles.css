@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Instrument+Serif:ital@0;1&display=swap');
+
+@import "tailwindcss";
+
+@media only screen and (min-width: 1274px) {
+    .container {
+        max-width: 1274px;
+        margin: 0 auto;
+        width: 100%;
+    }
+}
+
+.instrument-serif-regular {
+  font-family: "Instrument Serif", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.instrument-serif-regular-italic {
+  font-family: "Instrument Serif", serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.header {
+  width: 100%;
+  position: sticky;
+  z-index: 1000;
+}
+
+.banner-principal {
+  margin-top: -100px;
+  background-image: url('assets/banner-principal.png');
+  background-size: cover;
+  background-position: center;
+  height: 894px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.reserva-section {
+  background-image: url('assets/reserva-background.png');
+  height: 548px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
