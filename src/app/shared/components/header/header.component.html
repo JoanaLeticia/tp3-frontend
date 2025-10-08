@@ -13,13 +13,54 @@
         </ul>
       </div>
     </div>
-    <div class="conta">
+
+    <div *ngIf="!usuarioLogado" class="conta">
       <button class="entrar" (click)="onAbrirLogin()">
         Entrar
       </button>
-      <div class="criar-conta">
+      <button class="criar-conta" (click)="onAbrirRegistro()">
         Criar Conta
+      </button>
+    </div>
+
+    <div *ngIf="usuarioLogado" class="conta-logada">
+      <div class="user-menu" (click)="toggleDropdown($event)">
+        <div class="user-icon">
+          <i class="fa-solid fa-user"></i>
+        </div>
+        <div style="display: grid; color: #d6d6d6; font-size: 12px;">
+          Bem-vindo(a)
+          <div style="display: flex; align-items: center; gap: 7px;">
+            <span class="user-name">{{ getPrimeiroNome() }}</span>
+            <div class="dropdown-arrow">
+              <i class="fa-solid fa-chevron-down"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Adicionei a classe 'show' condicionalmente -->
+      <div *ngIf="mostrarDropdown" class="dropdown-menu show">
+        <div class="dropdown-item" (click)="fecharDropdown()">
+          <i class="fa-solid fa-user"></i>
+          Meu Perfil
+        </div>
+        <div class="dropdown-item" (click)="fecharDropdown()">
+          <i class="fa-solid fa-receipt"></i>
+          Meus Pedidos
+        </div>
+        <div class="dropdown-item" (click)="fecharDropdown()">
+          <i class="fa-solid fa-calendar"></i>
+          Minhas Reservas
+        </div>
+        <div class="dropdown-divider"></div>
+        <div class="dropdown-item logout" (click)="logout()">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          Sair
+        </div>
       </div>
     </div>
   </div>
+
+  <div *ngIf="mostrarDropdown" class="dropdown-overlay" (click)="fecharDropdown()"></div>
 </header>

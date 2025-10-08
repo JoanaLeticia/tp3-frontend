@@ -1,10 +1,10 @@
 import {
   DomSanitizer
-} from "./chunk-YZYOI2IE.js";
+} from "./chunk-SU4AWGRY.js";
+import "./chunk-YBQI5SKK.js";
 import {
   HttpClient
 } from "./chunk-OVTMCICT.js";
-import "./chunk-YBQI5SKK.js";
 import {
   isPlatformBrowser
 } from "./chunk-5RGSSY6Z.js";

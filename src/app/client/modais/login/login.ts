@@ -1,25 +1,37 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../auth/auth.service';
 
 @Component({
   selector: 'app-login-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
-export class LoginModalComponent {
+export class LoginModalComponent implements OnInit {
   @Output() close = new EventEmitter<void>();
   @Output() switchToRegister = new EventEmitter<void>();
 
-  email: string = '';
-  senha: string = '';
+  loginForm!: FormGroup;
+  
   lembrarMe: boolean = false;
   carregando: boolean = false;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private formBuilder: FormBuilder,
+    private authService: AuthService,
+  ) {}
+
+  ngOnInit(): void {
+      this.loginForm = this.formBuilder.group({
+        email: ['', [Validators.required, Validators.email]],
+        senha: ['', [Validators.required, Validators.minLength(6)]],
+      });
+  }
 
   // Fechar modal
   fecharModal() {
@@ -35,33 +47,39 @@ export class LoginModalComponent {
 
   // Login
   fazerLogin() {
-    if (!this.email || !this.senha) {
-      alert('Por favor, preencha todos os campos.');
-      return;
+    if (this.loginForm.valid) {
+      this.carregando = true;
+      
+      const email = this.loginForm.get('email')!.value;
+      const senha = this.loginForm.get('senha')!.value;
+
+      this.authService.login(email, senha).subscribe({
+        next: (resp) => {
+          this.carregando = false;
+          this.fecharModal();
+        },
+        error: (err) => {
+          this.carregando = false;
+          console.error('Erro no login:', err);
+          alert('Erro ao fazer login. Verifique suas credenciais.');
+        }
+      });
+    } else {
+      // Marca todos os campos como tocados para mostrar os erros
+      this.loginForm.markAllAsTouched();
+      alert('Por favor, preencha todos os campos corretamente');
     }
-
-    this.carregando = true;
-
-    // Simulação de login - substitua pela sua lógica real
-    setTimeout(() => {
-      console.log('Login attempt:', { email: this.email, lembrarMe: this.lembrarMe });
-      
-      // Aqui você integraria com seu AuthService
-      // this.authService.login(this.email, this.senha).subscribe(...)
-      
-      this.carregando = false;
-      this.fecharModal();
-      alert('Login realizado com sucesso!');
-    }, 1500);
   }
 
   // Recuperar senha
   recuperarSenha() {
-    if (!this.email) {
+    const email = this.loginForm.get('email')?.value;
+    
+    if (!email) {
       alert('Por favor, informe seu email para recuperar a senha.');
       return;
     }
-    alert(`Link de recuperação enviado para: ${this.email}`);
+    alert(`Link de recuperação enviado para: ${email}`);
   }
 
   // Ir para cadastro

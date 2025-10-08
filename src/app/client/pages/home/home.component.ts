@@ -25,11 +25,9 @@ export class HomeComponent implements OnInit {
   carregando: boolean = false;
   carregandoSugestoes: boolean = false;
 
-  // Variáveis para controle do carrossel
   sugestaoAtual: 'ALMOCO' | 'JANTAR' = 'ALMOCO';
   temAmbasSugestoes: boolean = false;
 
-  // Variáveis para reserva
   reservando: boolean = false;
   dataReserva: string = '';
   horarioReserva: string = '';
@@ -43,7 +41,6 @@ export class HomeComponent implements OnInit {
   mostrarLoginModal: boolean = false;
   mostrarRegistroModal: boolean = false;
 
-  // Horários pré-definidos (19:00 às 22:00, de 15 em 15 minutos)
   horariosDisponiveis: string[] = [];
 
   todosHorarios: string[] = this.gerarTodosHorarios();
@@ -80,7 +77,6 @@ export class HomeComponent implements OnInit {
     this.mostrarRegistroModal = false;
   }
 
-  // Buscar sugestões do chefe
   buscarSugestoesChefe() {
     this.carregandoSugestoes = true;
 
@@ -88,20 +84,16 @@ export class HomeComponent implements OnInit {
       next: (sugestao) => {
         console.log('Sugestão do chefe encontrada:', sugestao);
 
-        // Processar sugestão do almoço
         if (sugestao.itemAlmoco) {
           this.sugestaoAlmoco = this.processarItemSugestao(sugestao.itemAlmoco);
         }
 
-        // Processar sugestão do jantar
         if (sugestao.itemJantar) {
           this.sugestaoJantar = this.processarItemSugestao(sugestao.itemJantar);
         }
 
-        // Verificar se temos ambas as sugestões
         this.temAmbasSugestoes = !!this.sugestaoAlmoco && !!this.sugestaoJantar;
 
-        // Definir sugestão inicial baseada na disponibilidade
         if (this.sugestaoAlmoco) {
           this.sugestaoAtual = 'ALMOCO';
         } else if (this.sugestaoJantar) {
@@ -112,7 +104,6 @@ export class HomeComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erro ao carregar sugestões do chefe:', err);
-        // Se for 404 (não encontrado), não é erro, só não há sugestão ativa
         if (err.status !== 404) {
           console.error('Erro detalhado:', err);
         }
@@ -121,7 +112,6 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  // Processar item da sugestão (aplica desconto e URL da imagem)
   private processarItemSugestao(item: ItemCardapio): ItemCardapio {
     return {
       ...item,
@@ -131,12 +121,10 @@ export class HomeComponent implements OnInit {
     };
   }
 
-  // Calcular preço com desconto (20% off)
   private calcularPrecoComDesconto(precoBase: number): number {
     return precoBase * 0.8;
   }
 
-  // Métodos do carrossel
   proximaSugestao() {
     if (!this.temAmbasSugestoes) return;
 
@@ -149,7 +137,6 @@ export class HomeComponent implements OnInit {
     this.sugestaoAtual = this.sugestaoAtual === 'ALMOCO' ? 'JANTAR' : 'ALMOCO';
   }
 
-  // Verificar qual sugestão deve ser exibida
   get sugestaoExibida(): ItemCardapio | null {
     if (this.sugestaoAtual === 'ALMOCO') {
       return this.sugestaoAlmoco;
@@ -158,14 +145,20 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  // Método para buscar produtos por período
   buscarProdutosPorPeriodo() {
     this.carregando = true;
 
     this.produtoService.getByPeriodo(this.periodoSelecionado).subscribe({
       next: (produtos) => {
-        console.log(`Produtos carregados para período ${this.periodoSelecionado}:`, produtos);
-        this.produtos = produtos.slice(0, 4);
+        console.log('Produtos RAW:', produtos);
+        console.log('Primeiro produto:', produtos[0]);
+        console.log('Nome da imagem do primeiro produto:', produtos[0]?.nomeImagem);
+
+        this.produtos = produtos.slice(0, 4).map(produto => ({
+          ...produto,
+          urlImagem: this.produtoService.getUrlImagem(produto.nomeImagem)
+        }));
+
         this.carregando = false;
       },
       error: (err) => {
@@ -175,24 +168,21 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  // Método para alternar entre Almoço e Jantar
   alternarPeriodo(periodo: string) {
     this.periodoSelecionado = periodo;
     this.buscarProdutosPorPeriodo();
   }
 
-  // Adicionar ao carrinho
   adicionarAoCarrinho(produto: ItemCardapio) {
     console.log('Adicionar ao carrinho:', produto);
-    // Implementar lógica do carrinho aqui
     alert(`"${produto.nome}" adicionado ao carrinho!`);
   }
 
   gerarTodosHorarios(): string[] {
     const horarios: string[] = [];
-    const inicio = 19 * 60; // 19:00 em minutos
-    const fim = 22 * 60;    // 22:00 em minutos
-    const intervalo = 15;   // 15 minutos
+    const inicio = 19 * 60;
+    const fim = 22 * 60;
+    const intervalo = 15;
 
     for (let minuto = inicio; minuto <= fim; minuto += intervalo) {
       const horas = Math.floor(minuto / 60);
@@ -219,12 +209,10 @@ export class HomeComponent implements OnInit {
     this.reservaService.verificarDisponibilidade(this.dataReserva, this.numeroPessoas)
       .subscribe({
         next: (disponibilidade) => {
-          // Extrair todos os horários disponíveis de todas as mesas
           const todosHorariosDisponiveis = disponibilidade.flatMap(
             disp => disp.horariosDisponiveis
           );
 
-          // Remover duplicatas e ordenar
           this.horariosDisponiveis = [...new Set(todosHorariosDisponiveis)].sort();
           this.carregandoHorarios = false;
 
@@ -244,17 +232,14 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    // O sistema escolherá a mesa automaticamente
     const dataHora = `${this.dataReserva}T${this.horarioReserva}`;
 
     this.reservando = true;
 
-    // Primeiro, encontre uma mesa disponível para este horário
     this.reservaService.encontrarMesaDisponivel(this.dataReserva, this.horarioReserva, this.numeroPessoas)
       .subscribe({
         next: (mesa) => {
           if (mesa) {
-            // Criar reserva com a mesa encontrada
             const reservaDTO = {
               dataHora: dataHora,
               idMesa: mesa.id,
@@ -293,7 +278,6 @@ export class HomeComponent implements OnInit {
     this.horariosDisponiveis = [];
   }
 
-  // Métodos auxiliares para datas
   getDataMinima(): string {
     const hoje = new Date();
     return hoje.toISOString().split('T')[0];
@@ -301,7 +285,7 @@ export class HomeComponent implements OnInit {
 
   getDataMaxima(): string {
     const maxDate = new Date();
-    maxDate.setDate(maxDate.getDate() + 30); // 30 dias no futuro
+    maxDate.setDate(maxDate.getDate() + 30);
     return maxDate.toISOString().split('T')[0];
   }
 }

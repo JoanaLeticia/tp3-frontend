@@ -18,26 +18,34 @@
 
         <!-- Corpo do Modal -->
         <div class="modal-body">
-            <form (ngSubmit)="fazerLogin()">
+            <form [formGroup]="loginForm" (ngSubmit)="fazerLogin()">
                 <!-- Email -->
                 <div class="form-group">
                     <label for="email" class="form-label">E-mail</label>
-                    <input type="email" id="email" [(ngModel)]="email" name="email" class="form-input"
+                    <input type="email" id="email" formControlName="email" class="form-input"
                         placeholder="seu@email.com" required>
+                    <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="error-message">
+                        <span *ngIf="loginForm.get('email')?.errors?.['required']">Email é obrigatório</span>
+                        <span *ngIf="loginForm.get('email')?.errors?.['email']">Email inválido</span>
+                    </div>
                 </div>
 
                 <!-- Senha -->
                 <div class="form-group">
                     <label for="senha" class="form-label">Senha</label>
-                    <input type="password" id="senha" [(ngModel)]="senha" name="senha" class="form-input"
+                    <input type="password" id="senha" formControlName="senha" class="form-input"
                         placeholder="Sua senha" required>
+                    <div *ngIf="loginForm.get('senha')?.invalid && loginForm.get('senha')?.touched" class="error-message">
+                        <span *ngIf="loginForm.get('senha')?.errors?.['required']">Senha é obrigatória</span>
+                        <span *ngIf="loginForm.get('senha')?.errors?.['minlength']">Senha deve ter pelo menos 6 caracteres</span>
+                    </div>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <!-- Lembrar de mim -->
                     <div class="checkbox-group">
                         <input type="checkbox" id="lembrarMe" [(ngModel)]="lembrarMe" name="lembrarMe"
-                            class="checkbox-input">
+                            class="checkbox-input" [ngModelOptions]="{standalone: true}">
                         <label for="lembrarMe" class="checkbox-label">Lembrar de mim</label>
                     </div>
 
@@ -47,9 +55,8 @@
                     </a>
                 </div>
 
-
                 <!-- Botão de Login -->
-                <button type="submit" class="login-button" [disabled]="carregando">
+                <button type="submit" class="login-button" [disabled]="carregando || loginForm.invalid">
                     <span *ngIf="carregando" class="spinner"></span>
                     {{ carregando ? 'Entrando...' : 'Entrar' }}
                 </button>
