@@ -67,15 +67,28 @@ export class CarrinhoService {
     const carrinho = this.obterCarrinhoLocal(userId);
     const itemExistente = carrinho.find(i => i.id === item.id);
 
+    if (itemExistente) {
+      itemExistente.quantidade++;
+    } else {
+      carrinho.push({ ...item, quantidade: 1 });
+    }
+
     this.salvarCarrinho(userId, carrinho);
   }
 
   atualizarQuantidade(itemId: number, quantidade: number): void {
-    if (quantidade < 1) return;
-
     const userId = this.getCurrentUserId();
     const carrinho = this.obterCarrinhoLocal(userId);
     const item = carrinho.find(i => i.id === itemId);
+
+    if (item) {
+      if (quantidade < 1) {
+        this.removerItem(itemId);
+      } else {
+        item.quantidade = quantidade;
+        this.salvarCarrinho(userId, carrinho);
+      }
+    }
   }
 
   removerItem(itemId: number): void {

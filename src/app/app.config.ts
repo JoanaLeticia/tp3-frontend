@@ -8,6 +8,9 @@ import { JWT_OPTIONS, JwtHelperService } from '@auth0/angular-jwt';
 import { authInterceptor } from './auth/auth.interceptor';
 import { ErrorInterceptor } from './auth/error.interceptor';
 
+import { provideNativeDateAdapter } from '@angular/material/core'; 
+import { MAT_DATE_LOCALE } from '@angular/material/core';
+
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -19,5 +22,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor])),
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
     { provide: JWT_OPTIONS, useValue: JWT_OPTIONS },
+    provideNativeDateAdapter(),
+    { provide: MAT_DATE_LOCALE, useValue: 'pt-BR' }
   ]
 };

@@ -1,0 +1,31 @@
+<div class="modal-backdrop" (click)="fecharModal()">
+  <div class="modal-content" style="max-width: 600px;" (click)="$event.stopPropagation()">
+    <div class="modal-header" style="display: flex; align-items: center; justify-content: space-between;">
+      <h2 class="modal-title">Minhas Reservas</h2>
+      <button class="close-button" (click)="fecharModal()">&times;</button>
+    </div>
+    <div class="modal-body-reservas">
+      <div *ngIf="carregando" class="estado-feedback">
+        <span class="spinner"></span> Carregando suas reservas...
+      </div>
+      <div *ngIf="!carregando && reservas.length === 0" class="estado-feedback">
+        Você ainda não fez nenhuma reserva.
+      </div>
+      <div *ngIf="!carregando && reservas.length > 0" class="reservas-lista">
+        <div *ngFor="let reserva of reservas" class="reserva-item">
+          <div class="reserva-info">
+            <strong>Data: {{ reserva.dataHora | date:'dd/MM/yyyy \'às\' HH:mm' }}</strong>
+            <span>{{ reserva.numeroPessoas }} pessoa(s) - Mesa Nº {{ reserva.mesa?.numero }}</span>
+            <small>Código: {{ reserva.codigoConfirmacao }}</small>
+          </div>
+          <div class="reserva-acao">
+            <button class="btn-cancelar" *ngIf="isFutura(reserva.dataHora)" (click)="cancelarReserva(reserva.id)">
+              Cancelar
+            </button>
+            <span *ngIf="!isFutura(reserva.dataHora)" class="status-realizada">Realizada</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

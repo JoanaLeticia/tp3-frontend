@@ -1,2 +1,50 @@
+<router-outlet></router-outlet>
 
-<router-outlet />
+<app-floating-cart (finalizarCompra)="abrirModalCheckout()"></app-floating-cart>
+
+<app-checkout-modal 
+    *ngIf="mostrarModalCheckout" 
+    [itens]="itensDoCarrinho"
+    (close)="fecharModalCheckout()"
+    (pedidoConfirmado)="criarPedido($event)">
+</app-checkout-modal>
+
+<div class="modal-backdrop" *ngIf="mostrarModalConfirmacaoPedido">
+    <div class="modal-content" style="max-width: 450px;">
+        <div class="close">
+            <button class="close-button" (click)="fecharModalConfirmacaoPedido()">&times;</button>
+        </div>
+        <div class="modal-body" style="text-align: center; padding-bottom: 2rem;">
+            
+            <div class="confirmacao-header">
+                <div class="success-icon">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <h2 class="modal-title">Pedido Realizado!</h2>
+            </div>
+
+            <div class="resumo-reserva-final">
+                <div class="codigo-reserva">
+                    <span>O número do seu pedido é:</span>
+                    <strong>#{{ pedidoConfirmado?.id }}</strong>
+                </div>
+
+                <div class="detalhes-finais" style="text-align: center;">
+                    <p *ngIf="pedidoConfirmado?.atendimento?.tipo?.nome === 'Presencial'">
+                        Seu pedido já está na fila! <br>
+                        Aguarde ser chamado(a) pelo nome <strong>{{ pedidoConfirmado?.nomeCliente }}</strong> para retirada no balcão.
+                    </p>
+                    <p *ngIf="pedidoConfirmado?.atendimento?.tipo?.nome !== 'Presencial'">
+                        Seu pedido está sendo preparado e logo sairá para entrega no seu endereço.
+                    </p>
+                    <hr style="margin: 1rem 0;">
+                    <p><strong>Valor Total: {{ pedidoConfirmado?.valorTotal | currency:'BRL' }}</strong></p>
+                </div>
+            </div>
+
+            <button class="login-button" (click)="fecharModalConfirmacaoPedido()">
+                Entendido
+            </button>
+        </div>
+    </div>
+</div>

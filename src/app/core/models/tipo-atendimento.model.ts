@@ -1,4 +1,4 @@
-export class TipoAtendimento {
-    id!: number;
-    nome!: string;
+export interface TipoAtendimento {
+    id: number;
+    nome: string;
 }

@@ -8,6 +8,6 @@ export class Endereco {
     complemento?: string;
     bairro!: string;
     cep!: string;
-    municipio!: Municipio;  // precisa estar presente
+    municipio!: Municipio;
     cliente?: Cliente;
 }

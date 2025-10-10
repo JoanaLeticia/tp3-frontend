@@ -25,7 +25,7 @@ export class ItemCardapioService {
     findAllPaginado(page: number, size: number): Observable<PaginacaoResponse<ItemCardapio>> {
         const params = {
             page: page.toString(),
-            size: size.toString() // Mude de 'pageSize' para 'size'
+            size: size.toString()
         };
 
         return this.httpClient.get<PaginacaoResponse<ItemCardapio>>(this.baseUrl, { params }).pipe(
@@ -49,15 +49,14 @@ export class ItemCardapioService {
     findAll(page: number, size: number): Observable<PaginacaoResponse<ItemCardapio>> {
         const params = {
             page: page.toString(),
-            pageSize: size.toString() // O back-end espera 'pageSize'
+            pageSize: size.toString()
         };
-        // Agora o tipo esperado no get<> é o objeto de paginação
         return this.httpClient.get<PaginacaoResponse<ItemCardapio>>(this.baseUrl, { params });
     }
 
     findByNome(nome: string, page?: number, size?: number, sort?: string): Observable<ItemCardapio[]> {
         let params: any = {
-            nome: nome // Adiciona o 'nome' como um parâmetro de consulta
+            nome: nome
         };
 
         if (page !== undefined && size !== undefined) {
@@ -69,7 +68,6 @@ export class ItemCardapioService {
             params.sort = sort;
         }
 
-        // A URL agora aponta para o endpoint correto '/search'
         return this.httpClient.get<ItemCardapio[]>(`${this.baseUrl}/search`, { params });
     }
 

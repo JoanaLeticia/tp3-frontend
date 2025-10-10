@@ -1,10 +1,10 @@
-<app-header 
-  (abrirLogin)="abrirLogin()" 
-  (abrirRegistro)="abrirRegistro()">
+<app-header (abrirLogin)="abrirLogin()" (abrirRegistro)="abrirRegistro()" (abrirPerfil)="abrirModalPerfil()"
+    (abrirPedidos)="abrirModalPedidos()" (abrirReservas)="abrirModalReservas()"
+    (scrollToSection)="onScrollToSection($event)">
 </app-header>
 
 <body>
-    <div class="banner-principal">
+    <div id="home" class="banner-principal">
         <div class="texto-banner">
             <h2>
                 Seja bem-vindo!
@@ -12,13 +12,13 @@
             <h1>
                 FAÇA A SUA RESERVA
             </h1>
-            <div class="btn-cliqueaqui">
+            <div class="btn-cliqueaqui" (click)="onScrollTo('reservas')">
                 Clique aqui
             </div>
         </div>
     </div>
     <div class="container">
-        <div class="sobre">
+        <div id="sobre" class="sobre">
             <img src="assets/sobre-foodlfow.png" class="imagem-chef">
             <div class="sobre-texto">
                 <h2>Sobre nós</h2>
@@ -48,7 +48,6 @@
                     desconto!</p>
             </div>
 
-            <!-- Botões do Carrossel - Só aparecem quando há ambas as sugestões -->
             <div class="botoes-carrossel" *ngIf="temAmbasSugestoes">
                 <div class="btn-carrossel" (click)="sugestaoAnterior()">
                     <i class="fa-solid fa-angle-left"></i>
@@ -112,13 +111,12 @@
         </div>
     </div>
     <div class="container">
-        <div class="cardapio-section">
+        <div id="cardapio" class="cardapio-section">
             <div class="cardapio-title">
                 <h2>Confira o nosso</h2>
                 <h1>Cardápio</h1>
             </div>
 
-            <!-- Filtros de Período -->
             <div class="opcoes">
                 <div class="opcao" [class.opcao-selecionada]="periodoSelecionado === 'ALMOCO'"
                     (click)="alternarPeriodo('ALMOCO')">
@@ -130,29 +128,30 @@
                 </div>
             </div>
 
-            <!-- Loading State -->
             <div *ngIf="carregando" class="loading">
                 Carregando...
             </div>
 
-            <!-- Grid de Produtos -->
             <div *ngIf="!carregando">
-                <app-grid-produtos layoutMode="home" [produtos]="produtos">
-                </app-grid-produtos>
+                <app-detalhes-produto-modal *ngIf="mostrarModalDetalhes" [item]="itemSelecionado"
+                    (close)="fecharModalDetalhes()" (adicionar)="adicionarItemDetalhes($event)">
+                </app-detalhes-produto-modal>
 
-                <!-- Mensagem quando não há produtos -->
+                <app-grid-produtos layoutMode="home" [produtos]="produtos" (adicionar)="adicionarAoCarrinho($event)"
+                    (verDetalhes)="abrirModalDetalhes($event)"> </app-grid-produtos>
+
                 <div *ngIf="produtos.length === 0" class="sem-produtos">
                     Nenhum produto encontrado para o período selecionado.
                 </div>
             </div>
 
-            <div class="btn-vercardapio">
+            <div class="btn-vercardapio" (click)="abrirModalCardapioCompleto()">
                 Ver cardápio completo
             </div>
         </div>
     </div>
 
-    <div class="reserva-section" style="margin-bottom: 60px;">
+    <div id="reservas" class="reserva-section" style="margin-bottom: 60px;">
         <div class="reserva-section2">
             <div class="container">
                 <div class="reserva-texto">
@@ -165,7 +164,6 @@
                 <div class="formulario-reserva-tailwind" style="margin-top: -10px;">
                     <div style="display: flex; gap: 20px; width: 1034px;">
 
-                        <!-- Data com Date Picker Estilizado -->
                         <div class="space-y-2" style="width: 270px;">
                             <label for="dataReserva" class="block text-white font-medium text-sm">
                                 Data
@@ -173,22 +171,21 @@
                             <div class="relative">
                                 <input type="date" id="dataReserva" [(ngModel)]="dataReserva"
                                     (change)="onDadosReservaChange()" [min]="getDataMinima()" [max]="getDataMaxima()"
-                                    class="w-full px-4 py-3 bg-white/5 rounded-lg text-white placeholder-white placeholder-opacity-60 focus:outline-none focus:ring-2 focus:ring-white-300 focus:border-transparent transition-all duration-200 backdrop-blur-sm"
+                                    class="w-full px-4 py-3 bg-white/5 rounded-lg text-white ..."
                                     placeholder="Selecione a data" style="border: 1px solid hsl(0, 0%, 100%, 40%)">
-                                <div
-                                    class="absolute right-5 top-1/2 transform -translate-y-1/2 text-white text-opacity-60">
+                                <div class="absolute ...">
                                     <i class="fa-solid fa-calendar-days"></i>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Número de Pessoas -->
                         <div class="space-y-2" style="width: 270px;">
                             <label for="numeroPessoas" class="block text-white font-medium text-sm">
                                 Pessoas
                             </label>
                             <select id="numeroPessoas" [(ngModel)]="numeroPessoas" (change)="onDadosReservaChange()"
-                                class="w-full px-4 py-3 bg-white/5 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white-300 focus:border-transparent transition-all duration-200 backdrop-blur-sm appearance-none" style="border: 1px solid hsl(0, 0%, 100%, 40%)">
+                                class="w-full px-4 py-3 bg-white/5 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white-300 focus:border-transparent transition-all duration-200 backdrop-blur-sm appearance-none"
+                                style="border: 1px solid hsl(0, 0%, 100%, 40%)">
                                 <option *ngFor="let num of [1,2,3,4,5,6,7,8]" [value]="num"
                                     class="bg-gray-800 text-white">
                                     {{ num }} pessoa{{ num > 1 ? 's' : '' }}
@@ -196,13 +193,13 @@
                             </select>
                         </div>
 
-                        <!-- Horário -->
                         <div class="space-y-2" style="width: 225px;">
                             <label for="horarioReserva" class="block text-white font-medium text-sm">
                                 Horário
                             </label>
                             <select id="horarioReserva" [(ngModel)]="horarioReserva"
-                                class="w-full px-4 py-3 bg-white/5 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white-300 focus:border-transparent transition-all duration-200 backdrop-blur-sm appearance-none" style="border: 1px solid hsl(0, 0%, 100%, 40%)"
+                                class="w-full px-4 py-3 bg-white/5 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white-300 focus:border-transparent transition-all duration-200 backdrop-blur-sm appearance-none"
+                                style="border: 1px solid hsl(0, 0%, 100%, 40%)"
                                 [class.opacity-50]="horariosDisponiveis.length === 0"
                                 [disabled]="horariosDisponiveis.length === 0">
                                 <option value="" class="bg-gray-800 text-white">Selecione um horário</option>
@@ -213,12 +210,12 @@
                             </select>
                         </div>
 
-                        <!-- Botão de Reserva -->
                         <div class="mt-7 flex justify-center">
-                            <button type="button" (click)="fazerReserva()"
+                            <button type="button" (click)="checarDisponibilidade()"
                                 [disabled]="!dataReserva || !horarioReserva || reservando">
 
-                                <div class="flex items-center gap-3" style="width: 160px; display: flex; text-align: center; justify-content: center;">
+                                <div class="flex items-center gap-3"
+                                    style="width: 160px; display: flex; text-align: center; justify-content: center;">
                                     <span *ngIf="reservando">Processando...</span>
                                     <span *ngIf="!reservando">Checar disponibilidade</span>
                                 </div>
@@ -231,10 +228,135 @@
     </div>
 </body>
 
-<app-login-modal 
-  *ngIf="mostrarLoginModal"
-  (close)="fecharLoginModal()"
-  (switchToRegister)="abrirRegistro()">
+<app-login-modal *ngIf="mostrarLoginModal" (close)="fecharLoginModal()" (switchToRegister)="abrirRegistro()">
 </app-login-modal>
 
+<app-registro-modal *ngIf="mostrarRegistroModal" (close)="fecharRegistroModal()" (switchToLogin)="abrirLogin()">
+</app-registro-modal>
+
+<app-cardapio-completo-modal *ngIf="mostrarModalCardapioCompleto" (close)="fecharModalCardapioCompleto()"
+    (verDetalhes)="abrirModalDetalhes($event)" (adicionar)="adicionarAoCarrinho($event)">
+</app-cardapio-completo-modal>
+
 <app-footer></app-footer>
+
+<div class="modal-backdrop" *ngIf="mostrarModalReserva" (click)="fecharModalReserva()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="close">
+            <button class="close-button" (click)="fecharModalReserva()">&times;</button>
+        </div>
+        <div class="modal-header">
+            <h2 class="modal-title">Confirme sua Reserva</h2>
+        </div>
+        <div class="modal-body">
+            <div class="resumo-reserva">
+                <p><strong>Data:</strong> {{ reservaResumo?.data | date:'dd/MM/yyyy' }}</p>
+                <p><strong>Horário:</strong> {{ reservaResumo?.horario }}</p>
+                <p><strong>Pessoas:</strong> {{ reservaResumo?.pessoas }}</p>
+                <p><strong>Mesa Sugerida:</strong> {{ reservaResumo?.mesa?.numero }}</p>
+            </div>
+
+            <div class="login-link">
+                Já tem uma conta? <a (click)="abrirLogin()">Faça login</a> para agilizar.
+            </div>
+
+            <form #formConvidado="ngForm" (ngSubmit)="confirmarReservaConvidado(formConvidado)">
+                <div class="form-group">
+                    <label class="form-label">Nome Completo</label>
+                    <input type="text" name="nome" [(ngModel)]="dadosConvidado.nome" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" [(ngModel)]="dadosConvidado.email" class="form-input" required
+                        email>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Telefone</label>
+                    <input type="text" name="telefone" [(ngModel)]="dadosConvidado.telefone" class="form-input"
+                        required>
+                </div>
+
+                <button type="submit" class="login-button" [disabled]="formConvidado.invalid || reservando">
+                    <span *ngIf="reservando">Confirmando...</span>
+                    <span *ngIf="!reservando">Confirmar Reserva</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="mostrarModalConfirmacao">
+    <div class="modal-content" style="max-width: 420px;">
+        <div class="close">
+            <button class="close-button" (click)="fecharModalConfirmacao()">&times;</button>
+        </div>
+        <div class="modal-body" style="text-align: center; padding-bottom: 2rem;">
+
+            <div class="confirmacao-header">
+                <div class="success-icon">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <h2 class="modal-title">Reserva Confirmada!</h2>
+                <p class="confirmacao-subtitulo">
+                    Sua reserva foi agendada com sucesso. Um e-mail com os detalhes foi enviado para você.
+                </p>
+            </div>
+
+            <div class="resumo-reserva-final">
+                <div class="codigo-reserva">
+                    <span>Seu código de confirmação é:</span>
+                    <strong>{{ reservaConfirmada?.codigoConfirmacao }}</strong>
+                </div>
+                <div class="detalhes-finais">
+                    <p><strong>Data:</strong> {{ reservaConfirmada?.dataHora | date:'dd/MM/yyyy' }}</p>
+                    <p><strong>Horário:</strong> {{ reservaConfirmada?.dataHora | date:'HH:mm' }}</p>
+                    <p><strong>Pessoas:</strong> {{ reservaConfirmada?.numeroPessoas }}</p>
+                    <p><strong>Mesa:</strong> Nº {{ reservaConfirmada?.mesa?.numero }}</p>
+                </div>
+            </div>
+
+            <button class="login-button" (click)="fecharModalConfirmacao()">
+                Fechar
+            </button>
+        </div>
+    </div>
+</div>
+
+<app-meu-perfil-modal *ngIf="mostrarModalPerfil" (close)="fecharModalPerfil()"></app-meu-perfil-modal>
+
+<app-pedido-detalhes-modal *ngIf="mostrarModalDetalhesPedido" [pedido]="pedidoSelecionado"
+    (close)="fecharModalDetalhesPedido()">
+</app-pedido-detalhes-modal>
+
+<app-meus-pedidos-modal *ngIf="mostrarModalPedidos" (close)="fecharModalPedidos()"
+    (verDetalhes)="abrirModalDetalhesPedido($event)">
+</app-meus-pedidos-modal>
+
+<app-minhas-reservas-modal *ngIf="mostrarModalReservas" (close)="fecharModalReservas()"></app-minhas-reservas-modal>
+
+<div class="modal-backdrop" *ngIf="mostrarModalReservaLogado">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="close">
+            <button class="close-button" (click)="fecharModalReserva()">&times;</button>
+        </div>
+        <div class="modal-header">
+            <h2 class="modal-title">Confirmar sua Reserva</h2>
+        </div>
+        <div class="modal-body">
+            <p>Olá, {{ authService.getUsuariologadoSnapshot()?.nome }}!</p>
+            <p>Confira os detalhes e confirme sua reserva.</p>
+
+            <div class="resumo-reserva">
+                <p><strong>Data:</strong> {{ reservaResumo?.data | date:'dd/MM/yyyy' }}</p>
+                <p><strong>Horário:</strong> {{ reservaResumo?.horario }}</p>
+                <p><strong>Pessoas:</strong> {{ reservaResumo?.pessoas }}</p>
+                <p><strong>Mesa Sugerida:</strong> {{ reservaResumo?.mesa?.numero }}</p>
+            </div>
+
+            <button class="login-button" (click)="confirmarReservaLogado()" [disabled]="reservando">
+                <span *ngIf="reservando">Confirmando...</span>
+                <span *ngIf="!reservando">Confirmar Reserva</span>
+            </button>
+        </div>
+    </div>
+</div>

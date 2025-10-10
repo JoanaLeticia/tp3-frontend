@@ -7,8 +7,8 @@ export interface SugestaoChefResponse {
   id: number;
   itemAlmoco: ItemCardapio | null;
   itemJantar: ItemCardapio | null;
-  data: string; // ← Corrigido: é 'data', não 'dataInicio/dataFim'
-  ativa: boolean; // ← Pode não vir do back-end, mas podemos calcular
+  data: string;
+  ativa: boolean;
 }
 
 @Injectable({
@@ -23,7 +23,6 @@ export class SugestaoChefeService {
     return this.http.get<SugestaoChefResponse>(`${this.baseUrl}/ativa`);
   }
 
-  // Método opcional para buscar por data específica
   findByData(data: string): Observable<SugestaoChefResponse> {
     return this.http.get<SugestaoChefResponse>(`${this.baseUrl}/data/${data}`);
   }

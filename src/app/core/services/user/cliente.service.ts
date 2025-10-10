@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { Cliente } from '../../models/cliente.model';
 import { catchError, map } from 'rxjs/operators';
+import { Endereco } from '../../models/endereco.model';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +24,7 @@ export class ClienteService {
     }
 
     return this.httpClient.get<{ dados: Cliente[] }>(this.baseUrl, { params }).pipe(
-      map(response => response.dados) // Extrai apenas o array de clientes
+      map(response => response.dados)
     );
   }
 
@@ -41,6 +42,10 @@ export class ClienteService {
 
   update(cliente: Cliente): Observable<Cliente> {
     return this.httpClient.put<Cliente>(`${this.baseUrl}/${cliente.id}`, cliente);
+  }
+
+  getEnderecos(): Observable<Endereco[]> {
+    return this.httpClient.get<Endereco[]>(`${this.baseUrl}/meus-enderecos`);
   }
 
   updateParcial(dados: any, id: Number): Observable<Cliente> {
@@ -62,14 +67,14 @@ export class ClienteService {
       {},
       {
         headers,
-        responseType: 'text' // Força tratamento como texto
+        responseType: 'text'
       }
     ).pipe(
       map(response => {
         try {
-          return JSON.parse(response); // Tenta parsear se for JSON
+          return JSON.parse(response);
         } catch {
-          return { message: response }; // Se não for JSON, encapsula
+          return { message: response };
         }
       }),
       catchError(error => {
@@ -77,10 +82,8 @@ export class ClienteService {
         let errorMessage = 'Erro desconhecido';
 
         if (error.error instanceof ErrorEvent) {
-          // Erro do cliente
           errorMessage = error.error.message;
         } else {
-          // Erro do servidor
           try {
             errorMessage = JSON.parse(error.error).error || error.message;
           } catch {

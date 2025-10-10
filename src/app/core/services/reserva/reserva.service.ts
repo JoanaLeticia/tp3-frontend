@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Reserva } from '../../models/reserva.model';
 
 export interface ReservaDTO {
   dataHora: string;
@@ -64,5 +65,17 @@ export class ReservaService {
         numeroPessoas: numeroPessoas.toString()
       }
     });
+  }
+
+  createConvidado(dto: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/convidado`, dto);
+  }
+
+  getMinhasReservas(): Observable<Reserva[]> {
+    return this.http.get<Reserva[]>(`${this.baseUrl}/minhas-reservas`);
+  }
+
+  cancelarReserva(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }

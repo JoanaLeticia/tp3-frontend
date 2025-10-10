@@ -1,4 +1,7 @@
-<header class="header">
+<header class="header" [ngClass]="{
+  'header-at-top': isAtTop,
+  'header-scrolled': isScrolledPastThreshold
+}">
   <div class="container">
     <div class="logo-opcoes">
       <div class="nome-restaurante">
@@ -6,10 +9,10 @@
       </div>
       <div class="opcoes">
         <ul class="nav-list">
-          <li>Home</li>
-          <li>Cardápio</li>
-          <li>Reservas</li>
-          <li>Sobre</li>
+          <li (click)="onScrollTo('home')">Home</li>
+          <li (click)="onScrollTo('cardapio')">Cardápio</li>
+          <li (click)="onScrollTo('reservas')">Reservas</li>
+          <li (click)="onScrollTo('sobre')">Sobre</li>
         </ul>
       </div>
     </div>
@@ -39,17 +42,16 @@
         </div>
       </div>
 
-      <!-- Adicionei a classe 'show' condicionalmente -->
       <div *ngIf="mostrarDropdown" class="dropdown-menu show">
-        <div class="dropdown-item" (click)="fecharDropdown()">
+        <div class="dropdown-item" (click)="onAbrirPerfil()">
           <i class="fa-solid fa-user"></i>
           Meu Perfil
         </div>
-        <div class="dropdown-item" (click)="fecharDropdown()">
+        <div class="dropdown-item" (click)="onAbrirPedidos()">
           <i class="fa-solid fa-receipt"></i>
           Meus Pedidos
         </div>
-        <div class="dropdown-item" (click)="fecharDropdown()">
+        <div class="dropdown-item" (click)="onAbrirReservas()">
           <i class="fa-solid fa-calendar"></i>
           Minhas Reservas
         </div>

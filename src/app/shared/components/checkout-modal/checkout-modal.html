@@ -1,0 +1,79 @@
+<div class="modal-backdrop" (click)="fecharModal()">
+  <div class="modal-content" style="max-width: 500px;" (click)="$event.stopPropagation()">
+    <div class="modal-header" style="display: flex; padding-bottom: 10px; justify-content: space-between;">
+      <h2 class="modal-title">Finalizar Pedido</h2>
+      <button class="close-button" (click)="fecharModal()">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="resumo-carrinho">
+        <div *ngFor="let item of itens" class="item-resumo">
+          <span>{{ item.quantidade }}x {{ item.nome }}</span>
+          <span>{{ (item.precoBase * item.quantidade) | currency:'BRL' }}</span>
+        </div>
+        <div class="subtotal-resumo">
+          <strong>Subtotal:</strong>
+          <strong>{{ subtotal | currency:'BRL' }}</strong>
+        </div>
+      </div>
+
+      <h3 class="section-title">Como você quer receber seu pedido?</h3>
+      <div class="opcoes-atendimento">
+        <div class="opcao" [class.selecionada]="tipoAtendimentoSelecionado === 1" (click)="selecionarTipoAtendimento(1)">
+          <i class="fa-solid fa-store"></i>
+          <span>Presencial</span>
+        </div>
+        <div class="opcao" [class.selecionada]="tipoAtendimentoSelecionado === 2" (click)="selecionarTipoAtendimento(2)">
+          <i class="fa-solid fa-motorcycle"></i>
+          <span>Delivery Próprio</span>
+        </div>
+        <div class="opcao" [class.selecionada]="tipoAtendimentoSelecionado === 3" (click)="selecionarTipoAtendimento(3)">
+          <i class="fa-solid fa-mobile-screen-button"></i>
+          <span>Delivery por App</span>
+        </div>
+      </div>
+
+      <div class="campos-adicionais">
+        <div *ngIf="tipoAtendimentoSelecionado === 1" class="form-group">
+          <label class="form-label">Nome para retirada</label>
+          <input type="text" [(ngModel)]="nomeRetirada" class="form-input" placeholder="Seu nome">
+        </div>
+
+        <div *ngIf="tipoAtendimentoSelecionado === 2 || tipoAtendimentoSelecionado === 3">
+          <div class="form-group">
+            <label class="form-label">Selecione o endereço de entrega</label>
+            <select [(ngModel)]="idEnderecoSelecionado" class="form-input">
+              <option [ngValue]="null" disabled>Selecione um endereço</option>
+              <option *ngFor="let end of enderecosUsuario" [ngValue]="end.id">
+                {{ end.logradouro }}, {{ end.numero }} - {{ end.bairro }}
+              </option>
+            </select>
+          </div>
+
+          <div *ngIf="tipoAtendimentoSelecionado === 3" class="form-group">
+            <label class="form-label">Selecione o aplicativo parceiro</label>
+            <select [(ngModel)]="idParceiroSelecionado" (change)="calcularTaxa()" class="form-input">
+              <option [ngValue]="null" disabled>Selecione um parceiro</option>
+              <option *ngFor="let p of parceirosDelivery" [ngValue]="p.id">{{ p.nome }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="resumo-final">
+        <div class="linha-total">
+          <span>Taxa de Entrega:</span>
+          <span>{{ taxaEntrega | currency:'BRL' }}</span>
+        </div>
+        <div class="linha-total total-geral">
+          <strong>Valor Total:</strong>
+          <strong>{{ valorTotal | currency:'BRL' }}</strong>
+        </div>
+      </div>
+
+      <button class="login-button" (click)="confirmarPedido()" [disabled]="!isFormularioValido()">
+        Confirmar Pedido
+      </button>
+    </div>
+  </div>
+</div>

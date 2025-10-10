@@ -1,8 +1,14 @@
-import { Pedido } from "./pedido.model";
+import { Endereco } from "./endereco.model";
+import { ParceiroApp } from "./parceiro-app.model";
 import { TipoAtendimento } from "./tipo-atendimento.model";
 
 export interface Atendimento {
     id: number;
-    pedido: Pedido;
-    tipo: 'PRESENCIAL' | 'DELIVERY_PROPRIO' | 'DELIVERY_APLICATIVO';
+    tipo: TipoAtendimento;
+
+    numeroMesa?: number;
+    nomeRetirada?: string;
+    enderecoEntrega?: Endereco;
+    parceiro?: ParceiroApp;
+    taxa?: number;
 }

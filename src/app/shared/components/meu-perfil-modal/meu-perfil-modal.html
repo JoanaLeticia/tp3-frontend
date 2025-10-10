@@ -1,0 +1,80 @@
+<div class="modal-backdrop" (click)="fecharModal()">
+  <div class="modal-content" style="max-width: 600px;" (click)="$event.stopPropagation()">
+
+    <div class="modal-header" style="display: flex; align-items: center; justify-content: space-between;">
+      <h2 class="modal-title">Meu Perfil</h2>
+      <button class="close-button" (click)="fecharModal()">&times;</button>
+    </div>
+
+    <div class="modal-body-perfil">
+      <div class="abas-perfil">
+        <div class="aba" [class.ativa]="abaSelecionada === 'dados'" (click)="selecionarAba('dados')">
+          <i class="fa-solid fa-user-pen"></i> Dados Pessoais
+        </div>
+        <div class="aba" [class.ativa]="abaSelecionada === 'enderecos'" (click)="selecionarAba('enderecos')">
+          <i class="fa-solid fa-map-location-dot"></i> Endereços
+        </div>
+        <div class="aba" [class.ativa]="abaSelecionada === 'telefones'" (click)="selecionarAba('telefones')">
+          <i class="fa-solid fa-phone"></i> Telefones
+        </div>
+      </div>
+
+      <div class="conteudo-abas">
+        <div *ngIf="abaSelecionada === 'dados'">
+          <form [formGroup]="dadosPessoaisForm" (ngSubmit)="salvarDadosPessoais()">
+            <div class="form-group">
+              <label class="form-label">Nome Completo</label>
+              <input type="text" formControlName="nome" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">E-mail</label>
+              <input type="email" formControlName="email" class="form-input" readonly>
+              <small>O e-mail não pode ser alterado.</small>
+            </div>
+            <button type="submit" class="login-button" [disabled]="dadosPessoaisForm.invalid || salvando">
+              {{ salvando ? 'Salvando...' : 'Salvar Alterações' }}
+            </button>
+          </form>
+          <hr class="divider">
+          <h3 class="section-title">Alterar Senha</h3>
+          <form [formGroup]="senhaForm" (ngSubmit)="salvarSenha()">
+            <div class="form-group">
+              <label class="form-label">Senha Atual</label>
+              <input type="password" formControlName="senhaAtual" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nova Senha</label>
+              <input type="password" formControlName="novaSenha" class="form-input">
+            </div>
+            <button type="submit" class="login-button" [disabled]="senhaForm.invalid || salvando">
+              {{ salvando ? 'Alterando...' : 'Alterar Senha' }}
+            </button>
+          </form>
+        </div>
+
+        <div *ngIf="abaSelecionada === 'enderecos'">
+          <div *ngFor="let endereco of cliente?.listaEndereco" class="item-lista">
+            <i class="fa-solid fa-location-dot item-icone"></i>
+            <div class="item-info">
+              <strong>{{ endereco.logradouro }}, {{ endereco.numero }}</strong>
+              <span>{{ endereco.bairro }} - {{ endereco.municipio.nome }}/{{ endereco.municipio.estado.sigla }}</span>
+            </div>
+            <button class="btn-acao"><i class="fa-solid fa-trash"></i></button>
+          </div>
+          <button class="btn-adicionar-novo">+ Adicionar Novo Endereço</button>
+        </div>
+
+        <div *ngIf="abaSelecionada === 'telefones'">
+          <div *ngFor="let telefone of cliente?.listaTelefone" class="item-lista">
+            <i class="fa-solid fa-mobile-screen item-icone"></i>
+            <div class="item-info">
+              <strong>({{ telefone.codArea }}) {{ telefone.numero }}</strong>
+            </div>
+            <button class="btn-acao"><i class="fa-solid fa-trash"></i></button>
+          </div>
+          <button class="btn-adicionar-novo">+ Adicionar Novo Telefone</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

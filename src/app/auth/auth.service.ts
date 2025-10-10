@@ -1,16 +1,33 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 import { BehaviorSubject, catchError, map, Observable, of, tap, throwError } from 'rxjs';
 import { Usuario } from '../core/models/usuario.model';
 import { LocalStorageService } from '../core/services/local-storage.service';
 import { Cliente } from '../core/models/cliente.model';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { CarrinhoService } from '../core/services/order/carrinho.service';
 
+export interface TelefoneDTO {
+  codArea: string;
+  numero: string;
+}
 
-export interface RegisterRequest {
+export interface EnderecoDTO {
+  logradouro: string;
+  numero: string;
+  complemento?: string;
+  bairro: string;
+  cep: string;
+  idMunicipio: number;
+}
+
+// 2. Renomeamos e completamos a interface de registro para espelhar o ClienteDTO.java
+export interface ClienteDTO {
   nome: string;
   email: string;
   senha: string;
+  listaTelefone: TelefoneDTO[];
+  listaEndereco: EnderecoDTO[];
 }
 
 export interface RegisterResponse {
@@ -33,9 +50,12 @@ export class AuthService {
   private adminTokenKey = 'admin_token';
   private isAdminSubject = new BehaviorSubject<boolean>(false);
 
-  constructor(private http: HttpClient,
+  constructor(
+    private http: HttpClient,
     private localStorageService: LocalStorageService,
-    private jwtHelper: JwtHelperService) {
+    private jwtHelper: JwtHelperService,
+    private injector: Injector
+  ) {
 
     this.initUsuarioLogado();
 
@@ -69,13 +89,17 @@ export class AuthService {
           const usuarioLogado = res.body;
 
           if (usuarioLogado) {
+            const carrinhoService = this.injector.get(CarrinhoService);
+
+            carrinhoService.transferirCarrinhoParaUsuario(usuarioLogado.id);
+
             this.setUsuarioLogado(usuarioLogado);
             this.usuarioLogadoSubject.next(usuarioLogado);
           }
         }
       }),
       map((res: any) => res.body)
-    )
+    );
   }
 
   getUsuarioNome(): string | null {
@@ -212,8 +236,8 @@ export class AuthService {
     return this.localStorageService.getItem(this.usuarioLogadoKey);
   }
 
-  register(cliente: RegisterRequest): Observable<RegisterResponse> {
-    return this.http.post<RegisterResponse>(`${this.baseURL}/registrar`, cliente);
+  register(cliente: ClienteDTO): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(`${this.clienteURL}`, cliente);
   }
 
   getClienteId(): number | null {
@@ -221,18 +245,14 @@ export class AuthService {
     return usuario?.id || null;
   }
 
-  // isTokenExpired(): boolean {
-  //   const token = localStorage.getItem('token');
-  //   if (!token) {
-  //     return true;
-  //   }
+  isLoggedIn(): boolean {
+    const clienteToken = this.getToken();
+    const clienteTokenValido = !!clienteToken && !this.isTokenExpired(clienteToken);
 
-  //   try {
-  //     return this.jwtHelper.isTokenExpired(token);
-  //   } catch (error) {
-  //     console.error('Token inválido:', error);
-  //     return true; 
-  //   }
-  // }
+    const adminToken = this.getAdminToken();
+    const adminTokenValido = !!adminToken && !this.isTokenExpired(adminToken);
+
+    return clienteTokenValido || adminTokenValido;
+  }
 
 }

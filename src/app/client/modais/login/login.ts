@@ -33,19 +33,16 @@ export class LoginModalComponent implements OnInit {
       });
   }
 
-  // Fechar modal
   fecharModal() {
     this.close.emit();
   }
 
-  // Fechar ao clicar fora
   onBackdropClick(event: MouseEvent) {
     if ((event.target as HTMLElement).classList.contains('modal-backdrop')) {
       this.fecharModal();
     }
   }
 
-  // Login
   fazerLogin() {
     if (this.loginForm.valid) {
       this.carregando = true;
@@ -65,13 +62,11 @@ export class LoginModalComponent implements OnInit {
         }
       });
     } else {
-      // Marca todos os campos como tocados para mostrar os erros
       this.loginForm.markAllAsTouched();
       alert('Por favor, preencha todos os campos corretamente');
     }
   }
 
-  // Recuperar senha
   recuperarSenha() {
     const email = this.loginForm.get('email')?.value;
     
@@ -82,7 +77,6 @@ export class LoginModalComponent implements OnInit {
     alert(`Link de recuperação enviado para: ${email}`);
   }
 
-  // Ir para cadastro
   criarConta() {
     this.switchToRegister.emit();
   }

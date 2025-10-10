@@ -16,11 +16,11 @@ export class PedidoService {
   }
 
   findById(id: number): Observable<Pedido> {
-    console.log('Serviço - Buscando pedido por ID:', id); // Log 8
+    console.log('Serviço - Buscando pedido por ID:', id);
     return this.httpClient.get<Pedido>(`${this.baseUrl}/${id}`).pipe(
       tap({
-        next: (pedido) => console.log('Serviço - Pedido retornado:', pedido), // Log 9
-        error: (err) => console.error('Serviço - Erro na requisição:', err) // Log 10
+        next: (pedido) => console.log('Serviço - Pedido retornado:', pedido),
+        error: (err) => console.error('Serviço - Erro na requisição:', err)
       })
     );
   }
@@ -29,12 +29,8 @@ export class PedidoService {
     return this.httpClient.post(`${this.baseUrl}`, pedidoData);
   }
 
-  /*update(Pedido: Pedido): Observable<Pedido> {
-    return this.httpClient.put<Pedido>(`${this.baseUrl}/${Pedido.id}`, Pedido);
-  }*/
-
   delete(Pedido: Pedido): Observable<any> {
-    return this.httpClient.delete<any>(`${this.baseUrl}/${Pedido.idPedido}`);
+    return this.httpClient.delete<any>(`${this.baseUrl}/${Pedido.id}`);
   }
 
   count(): Observable<number> {
@@ -47,5 +43,9 @@ export class PedidoService {
 
   findByClienteId(clienteId: number): Observable<Pedido[]> {
     return this.httpClient.get<Pedido[]>(`${this.baseUrl}/cliente/${clienteId}`);
+  }
+
+  getMeusPedidos(): Observable<Pedido[]> {
+    return this.httpClient.get<Pedido[]>(`${this.baseUrl}/meus-pedidos`);
   }
 }

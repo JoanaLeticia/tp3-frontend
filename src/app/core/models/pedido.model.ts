@@ -6,13 +6,13 @@ import { StatusPedido } from "./status-pedido.model";
 import { TipoPeriodo } from "./tipo-periodo.model";
 
 export class Pedido {
-    idPedido!: number;
+    id!: number;
     cliente!: Cliente;
     enderecoEntrega!: Endereco;
     atendimento!: Atendimento;
     itens: ItemCardapio[] = [];
     dataPedido?: string;
-    statusPedido?: StatusPedido
+    status?: StatusPedido
     periodo?: TipoPeriodo;
     valorTotal!: number;
 }

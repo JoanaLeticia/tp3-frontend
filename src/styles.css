@@ -30,7 +30,6 @@
 }
 
 .banner-principal {
-  margin-top: -100px;
   background-image: url('assets/banner-principal.png');
   background-size: cover;
   background-position: center;

@@ -5,7 +5,7 @@ export class Reserva {
     id!: number;
     usuario!: Usuario;
     mesa!: Mesa;
-    horario?: string;
+    dataHora!: string;
     numeroPessoas!: number;
     codigoConfirmacao!: string;
 }

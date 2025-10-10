@@ -10,10 +10,24 @@ import { SugestaoChefeService } from '../../../core/services/pratos/sugestao-che
 import { ReservaService, DisponibilidadeMesa } from '../../../core/services/reserva/reserva.service';
 import { FormsModule } from '@angular/forms';
 import { LoginModalComponent } from '../../modais/login/login';
+import { RegistroModalComponent } from '../../modais/cadastro/registro';
+import { CarrinhoService } from '../../../core/services/order/carrinho.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { DetalhesProdutoModalComponent } from '../../../shared/components/detalhes-produto-modal/detalhes-produto-modal';
+import { CardapioCompletoModalComponent } from '../../../shared/components/cardapio-completo-modal/cardapio-completo-modal';
+import { MeuPerfilModalComponent } from '../../../shared/components/meu-perfil-modal/meu-perfil-modal';
+import { MeusPedidosModalComponent } from '../../../shared/components/meus-pedidos-modal/meus-pedidos-modal';
+import { PedidoDetalhesModalComponent } from '../../../shared/components/pedido-detalhes-modal/pedido-detalhes-modal';
+import { Pedido } from '../../../core/models/pedido.model';
+import { MinhasReservasModalComponent } from '../../../shared/components/minhas-reservas-modal/minhas-reservas-modal';
+import { AuthService } from '../../../auth/auth.service';
 
 @Component({
   selector: 'app-home',
-  imports: [HeaderComponent, FooterComponent, GridProdutos, CommonModule, FormsModule, LoginModalComponent],
+  imports: [HeaderComponent, FooterComponent, GridProdutos, CommonModule, FormsModule, LoginModalComponent, RegistroModalComponent, MatFormFieldModule, MatInputModule, MatDatepickerModule, DetalhesProdutoModalComponent, CardapioCompletoModalComponent, MeuPerfilModalComponent, MeusPedidosModalComponent, PedidoDetalhesModalComponent, MinhasReservasModalComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
@@ -45,11 +59,37 @@ export class HomeComponent implements OnInit {
 
   todosHorarios: string[] = this.gerarTodosHorarios();
 
+  mostrarModalReserva = false;
+  reservaResumo: { data: string, horario: string, pessoas: number, mesa: any } | null = null;
+  dadosConvidado = { nome: '', email: '', telefone: '' };
+
+  mostrarModalConfirmacao = false;
+  reservaConfirmada: any = null;
+
+  mostrarModalDetalhes = false;
+  itemSelecionado: ItemCardapio | null = null;
+
+  mostrarModalCardapioCompleto = false;
+
+  mostrarModalPerfil = false;
+
+  mostrarModalPedidos = false;
+
+  mostrarModalDetalhesPedido = false;
+  pedidoSelecionado: Pedido | null = null;
+
+  mostrarModalReservas = false;
+
+  mostrarModalReservaLogado = false;
+
   constructor(
     private route: ActivatedRoute,
     private produtoService: ItemCardapioService,
     private sugestaoChefeService: SugestaoChefeService,
-    private reservaService: ReservaService
+    private reservaService: ReservaService,
+    private carrinhoService: CarrinhoService,
+    private snackBar: MatSnackBar,
+    public authService: AuthService
   ) {
   }
 
@@ -60,7 +100,28 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  abrirModalDetalhes(item: ItemCardapio) {
+    this.fecharModalCardapioCompleto();
+
+    this.itemSelecionado = item;
+    this.mostrarModalDetalhes = true;
+  }
+
+  fecharModalDetalhes() {
+    this.mostrarModalDetalhes = false;
+    this.itemSelecionado = null;
+  }
+
+  abrirModalCardapioCompleto() {
+    this.mostrarModalCardapioCompleto = true;
+  }
+
+  fecharModalCardapioCompleto() {
+    this.mostrarModalCardapioCompleto = false;
+  }
+
   abrirLogin() {
+    this.fecharRegistroModal();
     this.mostrarLoginModal = true;
   }
 
@@ -68,8 +129,28 @@ export class HomeComponent implements OnInit {
     this.mostrarLoginModal = false;
   }
 
+  abrirModalDetalhesPedido(pedido: Pedido) {
+    this.pedidoSelecionado = pedido;
+    this.fecharModalPedidos();
+    this.mostrarModalDetalhesPedido = true;
+  }
+
+  fecharModalDetalhesPedido() {
+    this.mostrarModalDetalhesPedido = false;
+    this.pedidoSelecionado = null;
+  }
+
+  abrirModalPerfil() { this.mostrarModalPerfil = true; }
+  fecharModalPerfil() { this.mostrarModalPerfil = false; }
+
+  abrirModalPedidos() { this.mostrarModalPedidos = true; }
+  fecharModalPedidos() { this.mostrarModalPedidos = false; }
+
+  abrirModalReservas() { this.mostrarModalReservas = true; }
+  fecharModalReservas() { this.mostrarModalReservas = false; }
+
   abrirRegistro() {
-    this.mostrarLoginModal = false;
+    this.fecharLoginModal();
     this.mostrarRegistroModal = true;
   }
 
@@ -82,44 +163,37 @@ export class HomeComponent implements OnInit {
 
     this.sugestaoChefeService.findSugestaoAtiva().subscribe({
       next: (sugestao) => {
-        console.log('Sugestão do chefe encontrada:', sugestao);
-
         if (sugestao.itemAlmoco) {
-          this.sugestaoAlmoco = this.processarItemSugestao(sugestao.itemAlmoco);
+          this.sugestaoAlmoco = {
+            ...sugestao.itemAlmoco,
+            urlImagem: this.produtoService.getUrlImagem(sugestao.itemAlmoco.nomeImagem),
+            isSugestaoChefe: true,
+            precoComDesconto: this.calcularPrecoComDesconto(sugestao.itemAlmoco.precoBase)
+          };
         }
 
         if (sugestao.itemJantar) {
-          this.sugestaoJantar = this.processarItemSugestao(sugestao.itemJantar);
+          this.sugestaoJantar = {
+            ...sugestao.itemJantar,
+            urlImagem: this.produtoService.getUrlImagem(sugestao.itemJantar.nomeImagem),
+            isSugestaoChefe: true,
+            precoComDesconto: this.calcularPrecoComDesconto(sugestao.itemJantar.precoBase)
+          };
         }
 
         this.temAmbasSugestoes = !!this.sugestaoAlmoco && !!this.sugestaoJantar;
-
-        if (this.sugestaoAlmoco) {
-          this.sugestaoAtual = 'ALMOCO';
-        } else if (this.sugestaoJantar) {
-          this.sugestaoAtual = 'JANTAR';
-        }
-
+        if (this.sugestaoAlmoco) { this.sugestaoAtual = 'ALMOCO'; }
+        else if (this.sugestaoJantar) { this.sugestaoAtual = 'JANTAR'; }
         this.carregandoSugestoes = false;
       },
       error: (err) => {
         console.error('Erro ao carregar sugestões do chefe:', err);
-        if (err.status !== 404) {
-          console.error('Erro detalhado:', err);
-        }
         this.carregandoSugestoes = false;
       }
     });
   }
 
-  private processarItemSugestao(item: ItemCardapio): ItemCardapio {
-    return {
-      ...item,
-      urlImagem: this.produtoService.getUrlImagem(item.nomeImagem),
-      isSugestaoChefe: true,
-      precoComDesconto: this.calcularPrecoComDesconto(item.precoBase)
-    };
-  }
+
 
   private calcularPrecoComDesconto(precoBase: number): number {
     return precoBase * 0.8;
@@ -150,10 +224,6 @@ export class HomeComponent implements OnInit {
 
     this.produtoService.getByPeriodo(this.periodoSelecionado).subscribe({
       next: (produtos) => {
-        console.log('Produtos RAW:', produtos);
-        console.log('Primeiro produto:', produtos[0]);
-        console.log('Nome da imagem do primeiro produto:', produtos[0]?.nomeImagem);
-
         this.produtos = produtos.slice(0, 4).map(produto => ({
           ...produto,
           urlImagem: this.produtoService.getUrlImagem(produto.nomeImagem)
@@ -174,8 +244,15 @@ export class HomeComponent implements OnInit {
   }
 
   adicionarAoCarrinho(produto: ItemCardapio) {
-    console.log('Adicionar ao carrinho:', produto);
-    alert(`"${produto.nome}" adicionado ao carrinho!`);
+    if (produto) {
+      console.log('Adicionar ao carrinho:', produto);
+      this.carrinhoService.adicionarItem(produto);
+      this.snackBar.open(`"${produto.nome}" adicionado ao carrinho!`, 'Fechar', {
+        duration: 3000,
+        verticalPosition: 'bottom',
+        horizontalPosition: 'center',
+      });
+    }
   }
 
   gerarTodosHorarios(): string[] {
@@ -202,10 +279,16 @@ export class HomeComponent implements OnInit {
   }
 
   buscarHorariosDisponiveis() {
+    // Agora não precisa mais da verificação de null nem da formatação
+    if (!this.dataReserva || this.numeroPessoas <= 0) {
+      return;
+    }
+
     this.carregandoHorarios = true;
     this.horariosDisponiveis = [];
     this.horarioReserva = '';
 
+    // Usa a data diretamente (já está no formato correto)
     this.reservaService.verificarDisponibilidade(this.dataReserva, this.numeroPessoas)
       .subscribe({
         next: (disponibilidade) => {
@@ -215,8 +298,6 @@ export class HomeComponent implements OnInit {
 
           this.horariosDisponiveis = [...new Set(todosHorariosDisponiveis)].sort();
           this.carregandoHorarios = false;
-
-          console.log(`Encontrados ${this.horariosDisponiveis.length} horários disponíveis`);
         },
         error: (err) => {
           console.error('Erro ao buscar horários disponíveis:', err);
@@ -226,42 +307,36 @@ export class HomeComponent implements OnInit {
       });
   }
 
-  fazerReserva() {
+  checarDisponibilidade() {
     if (!this.dataReserva || !this.horarioReserva || !this.numeroPessoas) {
       alert('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
 
-    const dataHora = `${this.dataReserva}T${this.horarioReserva}`;
-
     this.reservando = true;
 
+    // Usa a data diretamente
     this.reservaService.encontrarMesaDisponivel(this.dataReserva, this.horarioReserva, this.numeroPessoas)
       .subscribe({
         next: (mesa) => {
           if (mesa) {
-            const reservaDTO = {
-              dataHora: dataHora,
-              idMesa: mesa.id,
-              numeroPessoas: this.numeroPessoas
+            this.reservaResumo = {
+              data: this.dataReserva, // Já está no formato correto
+              horario: this.horarioReserva,
+              pessoas: this.numeroPessoas,
+              mesa: mesa
             };
 
-            this.reservaService.create(reservaDTO).subscribe({
-              next: (reserva) => {
-                alert(`Reserva confirmada! \nMesa: ${mesa.numero} (${mesa.capacidade} pessoas)\nCódigo: ${reserva.codigoConfirmacao}`);
-                this.resetarFormularioReserva();
-                this.reservando = false;
-              },
-              error: (err) => {
-                console.error('Erro ao fazer reserva:', err);
-                alert('Erro ao fazer reserva. Tente novamente.');
-                this.reservando = false;
-              }
-            });
+            // Abre o modal correto baseado no login
+            if (this.authService.isLoggedIn()) {
+              this.mostrarModalReservaLogado = true;
+            } else {
+              this.mostrarModalReserva = true;
+            }
           } else {
-            alert('Não há mesas disponíveis para o horário selecionado. Por favor, escolha outro horário.');
-            this.reservando = false;
+            alert('Não há mesas disponíveis para o horário selecionado.');
           }
+          this.reservando = false;
         },
         error: (err) => {
           console.error('Erro ao encontrar mesa:', err);
@@ -271,8 +346,103 @@ export class HomeComponent implements OnInit {
       });
   }
 
+  private formatarData(data: Date): string {
+    const ano = data.getFullYear();
+    const mes = (data.getMonth() + 1).toString().padStart(2, '0');
+    const dia = data.getDate().toString().padStart(2, '0');
+    return `${ano}-${mes}-${dia}`;
+  }
+
+  confirmarReservaLogado() {
+    if (!this.reservaResumo) return;
+
+    this.reservando = true;
+    const dataHora = `${this.reservaResumo.data}T${this.reservaResumo.horario}:00`;
+
+    const dto = {
+      dataHora: dataHora,
+      idMesa: this.reservaResumo.mesa.id,
+      numeroPessoas: this.reservaResumo.pessoas,
+    };
+
+    this.reservaService.create(dto).subscribe({
+      next: (reserva) => {
+        this.reservando = false;
+        this.reservaConfirmada = reserva;
+        this.fecharModalReserva();
+        this.mostrarModalConfirmacao = true;
+      },
+      error: (err) => {
+        this.reservando = false;
+        console.error('Erro ao fazer reserva:', err);
+        alert('Erro ao confirmar a reserva.');
+      }
+    });
+  }
+
+  fecharModalReserva() {
+    this.mostrarModalReserva = false;
+    this.mostrarModalReservaLogado = false;
+    this.resetarFormularioReserva();
+  }
+
+  onScrollToSection(sectionId: string) {
+    if (sectionId === 'home') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  onScrollTo(sectionId: string) {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  confirmarReservaConvidado(form: any) {
+    if (form.invalid || !this.reservaResumo) return;
+
+    this.reservando = true;
+
+    const dataHora = `${this.reservaResumo.data}T${this.reservaResumo.horario}:00`;
+
+    const dto = {
+      dataHora: dataHora,
+      idMesa: this.reservaResumo.mesa.id,
+      numeroPessoas: this.reservaResumo.pessoas,
+      nomeConvidado: this.dadosConvidado.nome,
+      emailConvidado: this.dadosConvidado.email,
+      telefoneConvidado: this.dadosConvidado.telefone
+    };
+
+    this.reservaService.createConvidado(dto).subscribe({
+      next: (reserva) => {
+        this.reservando = false;
+
+        this.reservaConfirmada = reserva;
+        this.fecharModalReserva();
+        this.mostrarModalConfirmacao = true;
+      },
+      error: (err) => {
+        console.error('Erro ao fazer reserva de convidado:', err);
+        alert('Erro ao confirmar a reserva. Tente novamente.');
+        this.reservando = false;
+      }
+    });
+  }
+
+  fecharModalConfirmacao() {
+    this.mostrarModalConfirmacao = false;
+    this.reservaConfirmada = null;
+  }
+
   resetarFormularioReserva() {
-    this.dataReserva = '';
     this.horarioReserva = '';
     this.numeroPessoas = 2;
     this.horariosDisponiveis = [];
@@ -287,5 +457,17 @@ export class HomeComponent implements OnInit {
     const maxDate = new Date();
     maxDate.setDate(maxDate.getDate() + 30);
     return maxDate.toISOString().split('T')[0];
+  }
+
+  adicionarItemDetalhes(dados: { item: ItemCardapio, quantidade: number, observacao: string }) {
+    for (let i = 0; i < dados.quantidade; i++) {
+      this.carrinhoService.adicionarItem(dados.item);
+    }
+
+    this.snackBar.open(`"${dados.item.nome}" adicionado ao carrinho!`, 'Fechar', {
+      duration: 3000,
+      verticalPosition: 'bottom',
+      horizontalPosition: 'center',
+    });
   }
 }

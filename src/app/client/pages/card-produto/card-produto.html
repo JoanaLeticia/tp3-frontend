@@ -1,6 +1,5 @@
 <div class="prato-cardapio">
-  <!-- Use urlImagemCompleta em vez de nomeImagem -->
-  <img [src]="urlImagemCompleta" [alt]="itemCardapio.nome">
+  <img [src]="itemCardapio.urlImagem" [alt]="itemCardapio.nome">
 
   <div class="texto-prato">
     <div class="nome-prato">
@@ -19,7 +18,7 @@
       </p>
     </div>
 
-    <button class="btn-addcarrinho-cardapio" (click)="onAdicionar()">
+    <button class="btn-addcarrinho-cardapio" (click)="onAdicionar($event)">
       <i class="fa-solid fa-cart-shopping"></i>Adicionar ao Carrinho
     </button>
   </div>

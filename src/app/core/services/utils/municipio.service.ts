@@ -60,7 +60,7 @@ export class MunicipioService {
         }
         return [];
       }),
-      catchError(() => of([])) // Retorna array vazio em caso de erro
+      catchError(() => of([]))
     );
   }
 
@@ -91,11 +91,9 @@ export class MunicipioService {
         throw new Error('Resposta inesperada do servidor');
       }),
       catchError((error: HttpErrorResponse) => {
-        // Transforma o erro em um formato mais amigável
         let errorMessage = 'Erro ao excluir município';
 
         if (error.error && error.error.message) {
-          // Usa a mensagem do backend se existir
           errorMessage = error.error.message;
         } else if (error.status === 409) {
           errorMessage = 'Não é possível excluir o município pois está vinculado a endereços.';
